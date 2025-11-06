@@ -3,6 +3,7 @@ const router=express.Router()
 
 const {login,register,data}=require('../controllers/usersControllers')
 
+
 //endpoints publicos
 router.post('/login',login)
 router.post('/register',register)

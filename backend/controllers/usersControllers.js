@@ -3,9 +3,25 @@ const jwt= require('jsonwebtoken')
 const asyncHandler=require('express-async-handler')
 const User= require('../models/usersModel')
 
-const login=(req,res)=> {
-    res.status(200).json({message:'login'})
-}
+const login=asyncHandler(async(req,res)=> {
+    //desestructramos el body que pasamos en el request
+    const {email,password}=req.body
+
+    //verificar si el usuario existe
+    const user= await User.findOne({email})
+
+    if(user && (await bcrypt.compare(password,user.password))){
+        res.status(200).json({
+            _id:user.id,
+            nombre:user.nombre,
+            email:user.email,
+            token:generarToken(user._id)
+        })
+    }else {
+        res.status(401)
+        throw new Error('Credenciales incorrectas')
+    }
+})
 
 const register=asyncHandler(async(req,res)=> {
     const{nombre,email,password}=req.body
@@ -49,6 +65,12 @@ const register=asyncHandler(async(req,res)=> {
 
 const data=(req,res)=> {
     res.status(200).json({message:'data'})
+}
+
+const generarToken=(id)=>{
+    return jwt.sign({id},process.env.JWT_SECRET,{
+        expiresIn:'30d'
+    })
 }
 
 module.exports={
